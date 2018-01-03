@@ -4,7 +4,8 @@ const app = express();
 // ----------------------------------------
 // XML2JS
 // ----------------------------------------
-const XML2JS = require("xml2js");
+const xml2js = require("xml2js");
+const parser = new xml2js.Parser();
 
 // ----------------------------------------
 // App Variables
@@ -85,7 +86,7 @@ app.use(morganToolkit());
 // Fetch
 // ----------------------------------------
 
-// Require es6-promise polyfill and isomorphic-fetch
+const fetch = require("node-fetch");
 require("es6-promise").polyfill();
 require("isomorphic-fetch");
 
