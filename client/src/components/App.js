@@ -1,12 +1,13 @@
-import React, { Component } from "react";
-import logo from "../owl.png";
-import "../App.css";
-//import AppContainer from "../containers/AppContainer";
+import React, { Component } from 'react';
+import logo from '../owl.png';
+import '../App.css';
+import SearchContainer from '../containers/SearchContainer';
+import Search from './Search';
 
 class App extends Component {
   render() {
     return (
-      <html>
+      <div>
         <head>
           <link
             href="https://fonts.googleapis.com/css?family=Indie+Flower"
@@ -18,25 +19,9 @@ class App extends Component {
             <img src={logo} className="App-logo" alt="logo" />
             <h1 className="App-title">Welcome to Book Searcher</h1>
           </header>
-          <div className="container">
-            <div className="row">
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="search-query form-control"
-                  placeholder="Search"
-                />
-                <span className="input-group-btn">
-                  <button className="btn btn-danger" type="submit">
-                    Submit
-                  </button>
-                </span>
-              </div>
-            </div>
-          </div>
-          {/* <AppContainer /> */}
+          <SearchContainer />
         </div>
-      </html>
+      </div>
     );
   }
 }

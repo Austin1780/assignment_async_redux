@@ -1,6 +1,6 @@
-export const GET_BOOKS_REQUEST = "GET_BOOKS_REQUEST";
-export const GET_BOOKS_SUCCESS = "GET_BOOKS_SUCCESS";
-export const GET_BOOKS_FAILURE = "GET_BOOKS_FAILURE";
+export const GET_BOOKS_REQUEST = 'GET_BOOKS_REQUEST';
+export const GET_BOOKS_SUCCESS = 'GET_BOOKS_SUCCESS';
+export const GET_BOOKS_FAILURE = 'GET_BOOKS_FAILURE';
 
 export function getBooksRequest() {
   return {
@@ -22,12 +22,14 @@ export function getBooksFailure(error) {
   };
 }
 
-export function getInitialBooks() {
+export function getBooks(formData) {
   return dispatch => {
     // Update the state so that it knows the request has begun
     dispatch(getBooksRequest());
 
-    fetch("api/books")
+    let { searchParam, searchType } = formData;
+
+    fetch(`api/books?keyword=${searchParam}?query=${searchType}`)
       .then(response => {
         // If response not okay, throw an error
         if (!response.ok) {
