@@ -1,38 +1,38 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 
 // ----------------------------------------
 // XML2JS
 // ----------------------------------------
-const XML2JS = require('xml2js');
+const XML2JS = require("xml2js");
 
 // ----------------------------------------
 // App Variables
 // ----------------------------------------
-app.locals.appName = 'My App';
+app.locals.appName = "My App";
 
 // ----------------------------------------
 // ENV
 // ----------------------------------------
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
 }
 
 // ----------------------------------------
 // Body Parser
 // ----------------------------------------
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // ----------------------------------------
 // Sessions/Cookies
 // ----------------------------------------
-const cookieSession = require('cookie-session');
+const cookieSession = require("cookie-session");
 
 app.use(
   cookieSession({
-    name: 'session',
-    keys: [process.env.SESSION_SECRET || 'secret']
+    name: "session",
+    keys: [process.env.SESSION_SECRET || "secret"]
   })
 );
 
@@ -44,14 +44,14 @@ app.use((req, res, next) => {
 // ----------------------------------------
 // Flash Messages
 // ----------------------------------------
-const flash = require('express-flash-messages');
+const flash = require("express-flash-messages");
 app.use(flash());
 
 // ----------------------------------------
 // Method Override
 // ----------------------------------------
-const methodOverride = require('method-override');
-const getPostSupport = require('express-method-override-get-post-support');
+const methodOverride = require("method-override");
+const getPostSupport = require("express-method-override-get-post-support");
 
 app.use(
   methodOverride(
@@ -64,7 +64,7 @@ app.use(
 // Referrer
 // ----------------------------------------
 app.use((req, res, next) => {
-  req.session.backUrl = req.header('Referer') || '/';
+  req.session.backUrl = req.header("Referer") || "/";
   next();
 });
 
@@ -76,53 +76,82 @@ app.use(express.static(`${__dirname}/public`));
 // ----------------------------------------
 // Logging
 // ----------------------------------------
-const morgan = require('morgan');
-const morganToolkit = require('morgan-toolkit')(morgan);
+const morgan = require("morgan");
+const morganToolkit = require("morgan-toolkit")(morgan);
 
 app.use(morganToolkit());
 
 // ----------------------------------------
 // Fetch
 // ----------------------------------------
-const fetch = require('fetch');
-const getBookList = (query) => {
-  let {author, title} = query;
-  let response = fetch(`https://www.goodreads.com/search.xml?key=${process.env.GOOD_READS_KEY}&q=${query}`)
-}
+
+// Require es6-promise polyfill and isomorphic-fetch
+require("es6-promise").polyfill();
+require("isomorphic-fetch");
+
+const GOOD_READS_API_KEY = process.env.GOOD_READS_KEY;
+const baseUrl = "https://www.goodreads.com/";
+
+const getBookList = query => {
+  let { author, title } = query;
+  let response = fetch(
+    `${baseUrl}search.xml?key=${GOOD_READS_API_KEY}&q=${query}`
+  );
+  return response;
+};
 
 // ----------------------------------------
 // Routes
 // ----------------------------------------
-app.use('/', (req, res) => {
-});
+//app.use("/", (req, res) => {});
 
-app.get('/search', async (req, res) => {
-  let result = await ()
-})
+// app.get("/", async (req, res) => {
+//   let query = "hobbit";
+//   console.log(query);
+//   let result = await getBookList(query);
+//   console.log(result);
+//   res.end();
+// });
+
+app.get("/", async (req, res) => {
+  try {
+    //let query = req.query;
+    let query = "hobbit";
+    let response = await getBookList(query);
+    response = await response.text();
+    response = parser.toJson(response);
+    console.log(response);
+    res.json(response);
+  } catch (e) {
+    console.error(e);
+    res.json(e);
+  }
+  res.end();
+});
 
 // ----------------------------------------
 // Template Engine
 // ----------------------------------------
-const expressHandlebars = require('express-handlebars');
-const helpers = require('./helpers');
+const expressHandlebars = require("express-handlebars");
+const helpers = require("./helpers");
 
 const hbs = expressHandlebars.create({
   helpers: helpers,
-  partialsDir: 'views/',
-  defaultLayout: 'application'
+  partialsDir: "views/",
+  defaultLayout: "application"
 });
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
+app.engine("handlebars", hbs.engine);
+app.set("view engine", "handlebars");
 
 // ----------------------------------------
 // Server
 // ----------------------------------------
 const port = process.env.PORT || process.argv[2] || 3000;
-const host = 'localhost';
+const host = "localhost";
 
 let args;
-process.env.NODE_ENV === 'production' ? (args = [port]) : (args = [port, host]);
+process.env.NODE_ENV === "production" ? (args = [port]) : (args = [port, host]);
 
 args.push(() => {
   console.log(`Listening: http://${host}:${port}\n`);
@@ -143,7 +172,7 @@ app.use((err, req, res, next) => {
   if (err.stack) {
     err = err.stack;
   }
-  res.status(500).render('errors/500', { error: err });
+  res.status(500).render("errors/500", { error: err });
 });
 
 module.exports = app;
