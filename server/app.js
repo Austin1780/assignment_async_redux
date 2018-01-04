@@ -94,11 +94,19 @@ require("dotenv").config();
 const GOOD_READS_API_KEY = process.env.GOOD_READS_KEY;
 const baseUrl = "https://www.goodreads.com/";
 
-const getBookList = async query => {
-  let response = await fetch(
-    `${baseUrl}search.xml?key=${GOOD_READS_API_KEY}&q=${query}`
-  );
-  xml2js.parseString(await response.text(), (err, result) => {
+const getBookList = async (keyword, type) => {
+  let response = [];
+  if (type === "title") {
+    response = await fetch(
+      `${baseUrl}search.xml?key=${GOOD_READS_API_KEY}&q=${keyword}`
+    );
+  } else {
+    response = await fetch(
+      `${baseUrl}search.books.xml?key=${GOOD_READS_API_KEY}&q=${keyword}`
+    );
+  }
+  let booksGalore = await response.text();
+  xml2js.parseString(booksGalore, (err, result) => {
     let bookArray = result.GoodreadsResponse.search[0].results[0].work.map(
       book => book.best_book[0]
     );
@@ -117,14 +125,11 @@ const getBookList = async query => {
 // ----------------------------------------
 // Routes
 // ----------------------------------------
-//app.use("/", (req, res) => {});
-
-app.get("api/books", async (req, res) => {
+app.get("/api/books", async (req, res) => {
   try {
-    //let query = req.query;
-    let query = "tolkein";
-    let response = await getBookList(query);
-    res.send(response);
+    let { keyword, type } = req.query;
+    let response = await getBookList(keyword, type);
+    res.json(response);
   } catch (e) {
     console.error(e);
     res.json(e);
@@ -150,7 +155,7 @@ app.get("api/books", async (req, res) => {
 // ----------------------------------------
 // Server
 // ----------------------------------------
-const port = process.env.PORT || process.argv[2] || 3000;
+const port = process.env.PORT || process.argv[2] || 3001;
 const host = "localhost";
 
 let args;
